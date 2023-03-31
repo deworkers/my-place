@@ -1,26 +1,50 @@
-import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
-import HomeView from "../views/HomeView.vue";
+import {createRouter, createWebHistory, RouteRecordRaw} from "vue-router";
+import IndexPage from "../views/IndexPage.vue";
 
-const routes: Array<RouteRecordRaw> = [
-  {
-    path: "/",
-    name: "home",
-    component: HomeView,
-  },
-  {
-    path: "/about",
-    name: "about",
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () =>
-      import(/* webpackChunkName: "about" */ "../views/AboutView.vue"),
-  },
+import store from "./../store/index";
+
+
+const routes: Array < RouteRecordRaw > = [
+    {
+        path: "/",
+        name: "index",
+        component: IndexPage,
+    },
+    {
+        path: "/place-list",
+        name: "place-list",
+        component: () => import("@/views/PlaceList.vue"),
+    },
+    {
+        path: "/profile",
+        name: "profile",
+        beforeEnter: () => {
+            if (!store.state.user.loggedIn) {
+                router.push('/sign-in');
+            }
+        },
+        component: () => import("@/views/Profile.vue"),
+    },
+    {
+        path: "/search",
+        name: "search",
+        component: () => import("@/views/Search.vue"),
+    },
+    {
+        path: "/register",
+        name: "register",
+        component: () => import("@/views/RegisterPage.vue"),
+    },
+    {
+        path: "/sign-in",
+        name: "sign-in",
+        component: () => import("@/views/SignIn.vue"),
+    },
 ];
 
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
-  routes,
+    history: createWebHistory(process.env.BASE_URL),
+    routes,
 });
 
 export default router;
