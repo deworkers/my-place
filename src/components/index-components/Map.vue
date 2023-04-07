@@ -1,17 +1,22 @@
 <template>
     <div class="map">
-        <AddPlace 
+        <ActivePlace
             v-if="showPlace"
-            :activePlace="activePlace"
-        ></AddPlace>
+            :toggleShowPlace="toggleShowPlace"
+            :activePlace="activePlace"></ActivePlace>
+        <AddPlace
+            v-if="addPlace"
+            :toggleAddPlace="toggleAddPlace"
+            :addPlaceCoord="addPlaceCoord"></AddPlace>
         <GeoButton></GeoButton>
         <YandexMap
             :coordinates="coordinates"
             :zoom="14"
             :detailed-controls="detailedControls"
             :controls="controls"
+            :events="['click', 'contextmenu']"
             @click="handleOnMapClick"
-        >
+            @contextmenu="handleOnContextmenu">
             <YandexMarker
                 v-for="(point, index) in places"
                 :coordinates="[Number(point.coord[0]), Number(point.coord[1])]"
@@ -19,17 +24,17 @@
                 :marker-id="point.id"
                 @click="handleOnPointClick"
                 :options="getOptions(point)"
-                :properties="point"
-            >
+                :properties="point">
             </YandexMarker>
             <YandexMarker
                 v-if="userGeoposition"
                 :marker-id="'you'"
-                :coordinates="[Number(userGeoposition[0]), Number(userGeoposition[1])]"
-                :options="getOptions({icon: 'you'})"
-            >
+                :coordinates="[
+                    Number(userGeoposition[0]),
+                    Number(userGeoposition[1]),
+                ]"
+                :options="getOptions({ icon: 'you' })">
             </YandexMarker>
-            
         </YandexMap>
     </div>
 </template>
@@ -38,6 +43,7 @@
 import { defineComponent } from 'vue';
 import { YandexMap, YandexMarker } from 'vue-yandex-maps';
 import { mapState } from 'vuex';
+import ActivePlace from './ActivePlace';
 import AddPlace from './AddPlace';
 import GeoButton from './GeoButton';
 
@@ -48,38 +54,42 @@ export default defineComponent({
     components: {
         YandexMap,
         YandexMarker,
+        ActivePlace,
+        GeoButton,
         AddPlace,
-        GeoButton
     },
     data() {
         return {
             coordinates: [56.805227, 60.641756],
             controls: [],
-            detailedControls: { zoomControl: { position: { right: 10, top: 10 } } },
-            places: [
-                {
-                    id: 0,
-                    title: 'Engels Coffee',
-                    description: 'Антуражно, вкусно, недешево. Приятное место. Вкусный кофе (раф с малиной) и прекрасный тост на черном хлебе с каперсами — приятный перекус. Персонал вежливый. Живые растения. Минус - с парковкой в будни вечером плохо, имейте ввиду)) Но зато в самом центре!!!',
-                    coord: [56.805227, 60.641756],
-                    icon: 'default'
-                }
-            ],
+            detailedControls: {
+                zoomControl: { position: { right: 10, top: 10 } },
+            },
             showPlace: false,
-            activePlace: null
-        }
+            activePlace: null,
+            addPlace: false,
+            addPlaceCoord: null,
+        };
     },
     computed: {
-        ...mapState(['userGeoposition']),
+        ...mapState(['userGeoposition', 'places']),
     },
     methods: {
-        handleMapInit() {
-            console.log('handleMapInit');
+        handleMapInit(map) {
+            console.log(map);
         },
-        handleOnMapClick(event) {
-            console.log(event.get('coords'));
+        handleOnContextmenu(event) {
+            if (!this.addPlace) {
+                this.toggleAddPlace();
+            }
+            this.addPlaceCoord = event.get('coords');
+        },
+        handleOnMapClick() {
             if (this.showPlace) {
                 this.toggleShowPlace();
+            }
+            if (this.addPlace) {
+                this.toggleAddPlace();
             }
         },
         handleOnPointClick(event) {
@@ -93,7 +103,7 @@ export default defineComponent({
             case icon == 'default':
                 return '/pic/icon-inactive.png';
             case icon == 'you':
-                return '/pic/icon-you.png';    
+                return '/pic/icon-you.png';
             default:
                 return '/pic/icon-inactive.png';
             }
@@ -103,11 +113,19 @@ export default defineComponent({
                 iconLayout: 'default#imageWithContent',
                 iconImageHref: this.getIcon(point.icon),
                 iconImageSize: [36, 36],
-                iconImageOffset: [-36, -36],
-            }
+                iconImageOffset: [-18, -18],
+            };
         },
         toggleShowPlace() {
             this.showPlace = !this.showPlace;
+        },
+        toggleAddPlace() {
+            this.addPlace = !this.addPlace;
+        },
+    },
+    watch: {
+        userGeoposition(newValue, oldValue) {
+            this.coordinates = newValue;
         }
     },
 });

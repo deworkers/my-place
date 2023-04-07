@@ -24,11 +24,12 @@ export default defineComponent({
     },
     computed: {},
     methods: {
-        ...mapActions(['fetchUser']),
+        ...mapActions(['fetchUser', 'getPlaces']),
     },
     mounted() {
         auth.onAuthStateChanged((user: User | null) => {
             this.fetchUser(user);
+            this.getPlaces();
         });
     },
 });
@@ -39,7 +40,6 @@ export default defineComponent({
     font-family: 'Avenir Next Cyr', Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    text-align: center;
     color: #2c3e50;
 }
 

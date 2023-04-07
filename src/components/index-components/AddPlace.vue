@@ -1,17 +1,36 @@
 <template>
     <div
         class="add-place"
-        v-if="activePlace">
+        v-if="addPlaceCoord">
         <div class="add-place-top"></div>
-        <div class="add-place-title">{{ activePlace.title }}</div>
-        <div class="add-place-descr">{{ activePlace.description }}</div>
+        <div class="add-place-title">Добавить место</div>
+        <div class="add-place-form">
+            <div class="add-place-input">
+                <label for="">Название</label>
+                <input
+                    type="text"
+                    v-model="title" />
+            </div>
+            <div class="add-place-input">
+                <label for="">Описание</label>
+                <textarea
+                    type="text"
+                    v-model="description">
+                </textarea>
+            </div>
+        </div>
         <div class="add-place-bottom">
             <div class="add-place-bottom__left">
-                <button class="add-place-route">Маршрут</button>
+                <button
+                    @click="handleOnClick"
+                    class="add-place-button">
+                    Добавить
+                </button>
             </div>
             <div class="add-place-bottom__right">
-                <button class="add-place-edit"></button>
-                <button class="add-place-delete"></button>
+                <button
+                    @click="toggleAddPlace"
+                    class="add-place-delete"></button>
             </div>
         </div>
     </div>
@@ -19,114 +38,74 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { mapActions } from 'vuex';
 
 export default defineComponent({
     name: 'AddPlace',
-    props: ['activePlace'],
+    props: ['addPlaceCoord', 'toggleAddPlace'],
+    data() {
+        return {
+            title: null,
+            description: '',
+            icon: 'default',
+        };
+    },
     components: {},
     computed: {},
+    methods: {
+        ...mapActions(['addPlace', 'getPlaces']),
+        handleOnClick() {
+            const newId = Math.random().toString(24).slice(2);
+            this.addPlace({
+                id: newId,
+                coord: this.addPlaceCoord,
+                title: this.title,
+                description: this.description,
+                icon: this.icon,
+            }).then(() => {
+                this.toggleAddPlace();
+            });
+        },
+    },
 });
 </script>
 
 <style lang="less">
-.add-place {
-    background: #fff;
-    padding: 10px 15px 15px;
-    position: absolute;
-    bottom: 15px;
-    left: 15px;
-    width: calc(100% - 30px);
-    z-index: 10;
-    border-radius: 10px;
-    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.25);
-}
-
-.add-place-top {
-    background: #d9d9d9;
-    height: 5px;
-    width: 125px;
-    margin: 0 auto 20px;
-}
-
-.add-place-title {
-    font-size: 16px;
-    font-weight: 700;
-    line-height: 22px;
-    text-align: center;
+.add-place-input {
     margin-bottom: 15px;
+    width: 100%;
+    text-align: left;
+
+    input {
+        width: 100%;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        height: 35px;
+        padding: 0 10px;
+    }
+
+    textarea {
+        width: 100%;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        height: 100px;
+        outline: none;
+        padding: 5px;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 5px;
+    }
 }
 
-.add-place-descr {
+.add-place-button {
+    background: #3f51b5;
+    color: #fff;
+    height: 40px;
+    padding: 9px;
+    border-radius: 8px;
+    font-weight: 750;
     font-size: 14px;
-    line-height: 20px;
-    margin-bottom: 15px;
-}
-
-.add-place-bottom {
-    display: flex;
-    justify-content: space-between;
-}
-
-.add-place-bottom__left {
-}
-
-.add-place-route {
-    background: #3f51b5;
-    color: #fff;
-    height: 40px;
-    padding: 9px 15px;
-    border-radius: 8px;
-    font-weight: 750;
-    font-size: 12px;
-    display: flex;
-    align-items: center;
-    &:before {
-        content: '';
-        background: url(./../../assets/map-white-icon.svg);
-        width: 18px;
-        height: 17px;
-        display: inline-block;
-        margin-right: 8px;
-    }
-}
-
-.add-place-bottom__right {
-}
-
-.add-place-edit {
-    background: #3f51b5;
-    color: #fff;
-    height: 40px;
-    width: 40px;
-    padding: 9px;
-    border-radius: 8px;
-    font-weight: 750;
-    font-size: 12px;
-    margin-right: 5px;
-    &:before {
-        content: '';
-        background: url(./../../assets/pen-icon.svg);
-        width: 20px;
-        height: 20px;
-        display: block;
-    }
-}
-
-.add-place-delete {
-    background: #3f51b5;
-    color: #fff;
-    height: 40px;
-    width: 40px;
-    padding: 9px;
-    border-radius: 8px;
-    font-weight: 750;
-    font-size: 12px;
-    &:before {
-        content: '';
-        background: url(./../../assets/delete-icon.svg);
-        width: 20px;
-        height: 20px;
-        display: block;
-    }
 }
 </style>

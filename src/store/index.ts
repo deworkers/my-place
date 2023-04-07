@@ -1,6 +1,7 @@
 import { createStore } from "vuex";
-import { auth } from "@/firebaseConfig";
+import { auth} from "@/firebaseConfig";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile  } from "firebase/auth";
+import { getDatabase, ref, child, get, set, remove, onValue } from "firebase/database";
 
 export interface IPlace {
     id: number,
@@ -104,7 +105,23 @@ export default createStore<State>({
             navigator.geolocation.watchPosition(position => {
                 context.commit('SET_USER_GEOPOSITION', [position.coords.latitude, position.coords.longitude]);
             })
-        }
+        },
+
+        async getPlaces(context) {
+            const db = getDatabase();
+            const placesRef = ref(db, 'places/');
+            onValue(placesRef, (snapshot) => {
+                context.commit('SET_PLACES', snapshot.val())
+            });
+        },
+        async addPlace(context, place:IPlace) {
+            const db = getDatabase();
+            set(ref(db, 'places/' + place.id), place);
+        },
+        async deletPlace(context, id) {
+            const db = getDatabase();
+            remove(ref(db, 'places/' + id));
+        },
     },
     modules: {
 

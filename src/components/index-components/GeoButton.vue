@@ -9,7 +9,7 @@ import { defineComponent } from 'vue';
 import { mapActions } from 'vuex';
 
 export default defineComponent({
-    name: 'AddPlace',
+    name: 'GeoButton',
     components: {},
     computed: {},
     methods: {
